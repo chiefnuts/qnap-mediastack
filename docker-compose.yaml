@@ -1,0 +1,66 @@
+version: '2'
+services:
+    plex:
+        image: linuxserver/plex
+        container_name: plex
+        volumes:
+            - /path/to/plex/config:/config
+            - /path/to/plex/Movies:/data/movies
+            - /path/to/plex/Shows:/data/tvshows
+            - /path/to/plex/transcode:/data/transcode
+        network_mode: host
+        restart: always
+        environment:
+            - VERSION=latest
+            - TZ=America/New_York
+    nzbget:
+        image: linuxserver/nzbget
+        container_name: nzbget
+        volumes:
+            - /path/to/nzbget/config:/config
+            - /path/to/nzbget/downloads:/downloads
+        restart: always
+        environment:
+            - TZ=America/New_York
+        ports:
+            - 6789:6789
+    sonarr:
+        image: linuxserver/sonarr
+        container_name: sonarr
+        depends_on:
+            - nzbget
+        volumes:
+            - /path/to/sonarr/config:/config
+            - /path/to/nzbget/downloads:/downloads
+            - /path/to/plex/Shows:/tv
+        environment:
+            - TZ=America/New_York
+        ports:
+            - 8989:8989
+    radarr:
+        image: linuxserver/radarr
+        container_name: radarr
+        depends_on:
+            - nzbget
+        volumes:
+            - /path/to/radarr/config:/config
+            - /path/to/nzbget/downloads:/downloads
+            - /path/to/plex/Movies:/movies
+        environment:
+            - TZ=America/New_York
+        ports:
+            - 7878:7878
+    tatulli:
+      image: linuxserver/tatulli
+      contaimer_name: plexreports
+      depends_on:
+          - plex
+      volumes:
+          - /path/to/config:/config
+    # Still requires user to be added. See github for more details
+    watchtower:
+        image: v2tec/watchtower
+        container_name: watchtower
+        restart: always
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
