@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
     nzbget:
         image: linuxserver/nzbget
@@ -10,7 +10,7 @@ services:
         environment:
             - TZ=America/New_York
         ports:
-            - '6789:6789'
+            - 6789:6789/tcp
     sonarr:
         image: linuxserver/sonarr:latest
         container_name: sonarr
