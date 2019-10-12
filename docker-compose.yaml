@@ -1,66 +1,54 @@
 version: '2'
 services:
-    plex:
-        image: linuxserver/plex
-        container_name: plex
-        volumes:
-            - /path/to/plex/config:/config
-            - /path/to/plex/Movies:/data/movies
-            - /path/to/plex/Shows:/data/tvshows
-            - /path/to/plex/transcode:/data/transcode
-        network_mode: host
-        restart: always
-        environment:
-            - VERSION=latest
-            - TZ=America/New_York
     nzbget:
         image: linuxserver/nzbget
         container_name: nzbget
         volumes:
-            - /path/to/nzbget/config:/config
-            - /path/to/nzbget/downloads:/downloads
+            - /applications/nzbget:/config
+            - /downloads:/downloads
         restart: always
         environment:
             - TZ=America/New_York
         ports:
-            - 6789:6789
+            - '6789:6789'
     sonarr:
-        image: linuxserver/sonarr
+        image: linuxserver/sonarr:latest
         container_name: sonarr
         depends_on:
             - nzbget
         volumes:
-            - /path/to/sonarr/config:/config
-            - /path/to/nzbget/downloads:/downloads
-            - /path/to/plex/Shows:/tv
+            - /applications/sonarr:/config
+            - /downloads:/downloads
+            - /media/tv:/tv
         environment:
             - TZ=America/New_York
+            - PUID=1000
+            - PGID=1000
         ports:
-            - 8989:8989
+            - 8989:8989/tcp
     radarr:
-        image: linuxserver/radarr
+        image: linuxserver/radarr:latest
         container_name: radarr
         depends_on:
             - nzbget
         volumes:
-            - /path/to/radarr/config:/config
-            - /path/to/nzbget/downloads:/downloads
-            - /path/to/plex/Movies:/movies
+            - /applications/radarr:/config
+            - /downloads:/downloads
+            - /media/movies:/movies
         environment:
             - TZ=America/New_York
         ports:
-            - 7878:7878
+            - 7878:7878/tcp
     tatulli:
-      image: linuxserver/tatulli
-      contaimer_name: plexreports
-      depends_on:
-          - plex
-      volumes:
-          - /path/to/config:/config
-    # Still requires user to be added. See github for more details
+        image: linuxserver/tautulli
+        container_name: plexreports
+        volumes:
+            - /applications/tatulli:/config
+        ports:
+            - 8181:8181/tcp
     watchtower:
         image: v2tec/watchtower
         container_name: watchtower
         restart: always
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
+            - '/var/run/docker.sock:/var/run/docker.sock'
