@@ -4,11 +4,13 @@ services:
         image: linuxserver/nzbget
         container_name: nzbget
         volumes:
-            - /applications/nzbget:/config
-            - /downloads:/downloads
+            - /share/applications/nzbget:/config
+            - /share/downloads:/downloads
         restart: always
         environment:
             - TZ=America/New_York
+            - PUID=1000
+            - PGID=100
         ports:
             - 6789:6789/tcp
     sonarr:
@@ -17,13 +19,13 @@ services:
         depends_on:
             - nzbget
         volumes:
-            - /applications/sonarr:/config
-            - /downloads:/downloads
-            - /media/tv:/tv
+            - /share/applications/sonarr:/config
+            - /share/downloads:/downloads
+            - /share/media/tv:/tv
         environment:
             - TZ=America/New_York
             - PUID=1000
-            - PGID=1000
+            - PGID=100
         ports:
             - 8989:8989/tcp
     radarr:
@@ -32,11 +34,13 @@ services:
         depends_on:
             - nzbget
         volumes:
-            - /applications/radarr:/config
-            - /downloads:/downloads
-            - /media/movies:/movies
+            - /share/applications/radarr:/config
+            - /share/downloads:/downloads
+            - /share/media/movies:/movies
         environment:
             - TZ=America/New_York
+            - PUID=1000
+            - PGID=100
         ports:
             - 7878:7878/tcp
     tatulli:
@@ -46,6 +50,9 @@ services:
             - /applications/tatulli:/config
         ports:
             - 8181:8181/tcp
+        environment:
+            - PUID=1000
+            - PGID=100
     watchtower:
         image: v2tec/watchtower
         container_name: watchtower
